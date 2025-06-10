@@ -43,7 +43,8 @@ export class MessagesService {
       }
       const { chat } = messagesParent;
       const isBranchedChat = chat.parentId !== null;
-      if (!isBranchedChat && !chat.parentId) {
+
+      if (!isBranchedChat) {
         const chatMessages = await this.messageRepository.find({
           where: { chatId },
           order: { createdAt: 'ASC' },
@@ -119,6 +120,22 @@ export class MessagesService {
     } catch (error) {
       throw new HttpException(
         `Error deleting data ${error.message}`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  async getPublicMessages(publicId: string) {
+    try {
+      const chatId = Buffer.from(publicId, 'base64').toString('utf-8');
+      const messages = await this.messageRepository.find({
+        where: { chatId },
+        order: { createdAt: 'ASC' },
+      });
+      return messages;
+    } catch (error) {
+      throw new HttpException(
+        `Error fetching messages ${error.message}`,
         HttpStatus.BAD_REQUEST,
       );
     }

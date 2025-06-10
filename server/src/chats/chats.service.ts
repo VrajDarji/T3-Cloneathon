@@ -129,4 +129,33 @@ export class ChatsService {
       );
     }
   }
+
+  async makePublicRoute(chatId: string) {
+    try {
+      const chat = await this.findOne(chatId);
+      if (!chat) {
+        throw new NotFoundException();
+      }
+      const updateData = {
+        isPublic: true,
+      };
+      await this.update(chatId, updateData);
+
+      const publicId = Buffer.from(chatId).toString('base64');
+      return { publicId };
+    } catch (error) {
+      throw new HttpException(
+        `Error making route public ${error.message}`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  async getPublicChat(publicId: string) {
+    const chatId = Buffer.from(publicId, 'base64').toString('utf-8');
+    const publicChat = await this.chatRepository.findOne({
+      where: { isPublic: true, id: chatId },
+    });
+    return publicChat;
+  }
 }

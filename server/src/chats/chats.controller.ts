@@ -19,6 +19,7 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { chatDataFiltersDto } from './entities/chat.entity';
 import { LoggedUser } from 'src/auth/decorators/get-user.decorator';
 import { User } from 'src/users/entities/user.entity';
+import { Public } from 'src/auth/decorators/public.decorator';
 
 @Controller('chats')
 @UseGuards(JwtAuthGuard)
@@ -70,6 +71,17 @@ export class ChatsController {
   @Get(':id')
   async findOne(@Param('id') id: string) {
     return this.chatsService.findOne(id);
+  }
+
+  @Get('public/:publicId')
+  @Public()
+  async getPublicChat(@Param('publicId') publicId: string) {
+    return await this.chatsService.getPublicChat(publicId);
+  }
+
+  @Post('make-public/:chatId')
+  async makePublic(@Param('chatId', ParseUUIDPipe) chatId: string) {
+    return await this.chatsService.makePublicRoute(chatId);
   }
 
   @Patch(':id')
