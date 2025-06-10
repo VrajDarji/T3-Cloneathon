@@ -1,26 +1,132 @@
-import { Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateChatDto } from './dto/create-chat.dto';
 import { UpdateChatDto } from './dto/update-chat.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Chat, chatDataFiltersDto } from './entities/chat.entity';
+import { Repository } from 'typeorm';
+import { Status } from './entities/status.enum';
 
 @Injectable()
 export class ChatsService {
-  create(createChatDto: CreateChatDto) {
-    return 'This action adds a new chat';
+  constructor(
+    @InjectRepository(Chat)
+    private readonly chatRepository: Repository<Chat>,
+  ) {}
+
+  async create(createChatDto: CreateChatDto) {
+    try {
+      const chat = this.chatRepository.create(createChatDto);
+      return await this.chatRepository.save(chat);
+    } catch (error) {
+      throw new HttpException(
+        `Failed to create chat ${error.message}`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
   }
 
-  findAll() {
-    return `This action returns all chats`;
+  async findAllByUserId(userId: string, chatDataFilters: chatDataFiltersDto) {
+    try {
+      if (!userId) {
+        throw new NotFoundException();
+      }
+      if (chatDataFilters) {
+        const { status } = chatDataFilters;
+        const users = await this.chatRepository.find({
+          where: { userId, status },
+        });
+        return users;
+      }
+      const users = await this.chatRepository.find({
+        where: { userId },
+        order: { createdAt: 'ASC' },
+      });
+      return users;
+    } catch (error) {
+      throw new HttpException(
+        `Failed to fetch chats ${error.message}`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} chat`;
+  async findOne(id: string) {
+    try {
+      const chat = await this.chatRepository.findOne({ where: { id } });
+      if (!chat) {
+        throw new NotFoundException('Chat not found');
+      }
+      return chat;
+    } catch (error) {
+      throw new HttpException(
+        `Error fetching data ${error.message}`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
   }
 
-  update(id: number, updateChatDto: UpdateChatDto) {
-    return `This action updates a #${id} chat`;
+  async update(id: string, updateChatDto: UpdateChatDto) {
+    try {
+      const chat = await this.findOne(id);
+      if (!chat) {
+        throw new NotFoundException('Chat not found');
+      }
+      Object.assign(chat, updateChatDto);
+
+      return await this.chatRepository.save(chat);
+    } catch (error) {
+      throw new HttpException(
+        `Error updating data ${error.message}`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} chat`;
+  async remove(id: string) {
+    try {
+      const chat = await this.findOne(id);
+      if (!chat) {
+        throw new NotFoundException('Chat not found');
+      }
+      return await this.chatRepository.remove(chat);
+    } catch (error) {
+      throw new HttpException(
+        `Error deleting data ${error.message}`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+  async createBranch(
+    parentId: string,
+    branchedFromMsgId: string,
+    userId: string,
+  ) {
+    try {
+      const parentChat = await this.findOne(parentId);
+      if (!parentChat) {
+        throw new NotFoundException('Chat not found');
+      }
+      const newTitle = `Branched from ${parentChat.title}`;
+      const createData: CreateChatDto = {
+        title: newTitle,
+        parentId,
+        userId,
+        branchedFromMsgId,
+        isPublic: false,
+        status: Status.ACTIVE,
+      };
+      const branchedChat = await this.create(createData);
+      return await this.chatRepository.save(branchedChat);
+    } catch (error) {
+      throw new HttpException(
+        `Error creating branch : ${error.message}`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
   }
 }

@@ -1,26 +1,95 @@
-import { Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { User } from './entities/user.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class UsersService {
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+  constructor(
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+  ) {}
+  async create(createUserDto: CreateUserDto) {
+    try {
+      const user = this.userRepository.create(createUserDto);
+      return await this.userRepository.save(user);
+    } catch (error) {
+      throw new HttpException(
+        `Failed to create user ${error.message}`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
   }
 
-  findAll() {
-    return `This action returns all users`;
+  async findAll() {
+    try {
+      const users = await this.userRepository.find();
+      const filteredData = users.map((user) => ({
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        persona: user.persona,
+        createdAt: user.createdAt,
+      }));
+      return filteredData;
+    } catch (error) {
+      throw new HttpException(
+        `Error fetching details ${error.message}`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findOne(id: string) {
+    try {
+      const user = await this.userRepository.findOne({ where: { id } });
+      if (!user) {
+        throw new NotFoundException(`User not found`);
+      }
+      return user;
+    } catch (error) {
+      throw new HttpException(
+        `Error fetching details ${error.message}`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(id: string, updateUserDto: UpdateUserDto) {
+    try {
+      const user = await this.findOne(id);
+      if (!user) {
+        throw new NotFoundException();
+      }
+      Object.assign(user, updateUserDto);
+      return await this.userRepository.save(user);
+    } catch (error) {
+      throw new HttpException(
+        `Error updating data ${error.message}`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(id: string) {
+    try {
+      const user = await this.findOne(id);
+      if (!user) {
+        throw new NotFoundException();
+      }
+      return await this.userRepository.remove(user);
+    } catch (error) {
+      throw new HttpException(
+        `Error deleting data ${error.message}`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
   }
 }
