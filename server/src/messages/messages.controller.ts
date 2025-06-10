@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   ParseUUIDPipe,
+  Query,
 } from '@nestjs/common';
 import { MessagesService } from './messages.service';
 import { CreateMessageDto } from './dto/create-message.dto';
@@ -27,7 +28,7 @@ export class MessagesController {
 
   @Get('chats/:chatId')
   async findAll(@Param('chatId', ParseUUIDPipe) id: string) {
-    return await this.messagesService.findAllChatId(id);
+    return await this.messagesService.findAllByChatId(id);
   }
 
   @Get(':id')
@@ -49,5 +50,10 @@ export class MessagesController {
   @Public()
   async getPublicMessages(@Param('publicId') id: string) {
     return await this.messagesService.getPublicMessages(id);
+  }
+
+  @Post('web-search')
+  async webSearch(@Query('query') query: string) {
+    return await this.messagesService.webSearch(query);
   }
 }

@@ -9,6 +9,7 @@ import { ChatsModule } from './chats/chats.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { ApiModule } from './api/api.module';
+import { WebSearchModule } from './web-search/web-search.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { ApiModule } from './api/api.module';
     MessagesModule,
     AuthModule,
     ApiModule,
+    WebSearchModule,
   ],
   controllers: [AppController],
   providers: [AppService],

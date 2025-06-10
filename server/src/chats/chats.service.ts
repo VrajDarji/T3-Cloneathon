@@ -36,6 +36,7 @@ export class ChatsService {
         throw new NotFoundException();
       }
       if (chatDataFilters) {
+        // Status Filters
         const { status } = chatDataFilters;
         const users = await this.chatRepository.find({
           where: { userId, status },
@@ -111,7 +112,8 @@ export class ChatsService {
       if (!parentChat) {
         throw new NotFoundException('Chat not found');
       }
-      const newTitle = `Branched from ${parentChat.title}`;
+      // Find parent and give branched a title branched from
+      const newTitle = `Branched from -  ${parentChat.title}`;
       const createData: CreateChatDto = {
         title: newTitle,
         parentId,
@@ -120,6 +122,7 @@ export class ChatsService {
         isPublic: false,
         status: Status.ACTIVE,
       };
+      // Create new branch with parentId and brancheFromMsgId
       const branchedChat = await this.create(createData);
       return await this.chatRepository.save(branchedChat);
     } catch (error) {
@@ -136,11 +139,15 @@ export class ChatsService {
       if (!chat) {
         throw new NotFoundException();
       }
+      // Find chat which we want to make public
+      // Mark it as public
       const updateData = {
         isPublic: true,
       };
       await this.update(chatId, updateData);
 
+      // Create a one time access only publicId from which chat can be accessed
+      // On Interface for usage generate a new route public / publicId
       const publicId = Buffer.from(chatId).toString('base64');
       return { publicId };
     } catch (error) {

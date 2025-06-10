@@ -9,13 +9,27 @@ import { UpdateMessageDto } from './dto/update-message.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Message } from './entities/message.entity';
 import { Repository } from 'typeorm';
+import { WebSearchService } from 'src/web-search/web-search.service';
 
 @Injectable()
 export class MessagesService {
   constructor(
     @InjectRepository(Message)
     private readonly messageRepository: Repository<Message>,
+    private readonly webSearchService: WebSearchService,
   ) {}
+
+  async webSearch(query: string) {
+    try {
+      const results = await this.webSearchService.searchDuckDuckGo(query);
+      return results;
+    } catch (error) {
+      throw new HttpException(
+        `Error :${error.message}`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
 
   async create(createMessageDto: CreateMessageDto) {
     try {
@@ -29,11 +43,12 @@ export class MessagesService {
     }
   }
 
-  async findAllChatId(chatId: string) {
+  async findAllByChatId(chatId: string) {
     try {
       if (!chatId) {
         throw new NotFoundException();
       }
+      // Find messageParent
       const messagesParent = await this.messageRepository.findOne({
         where: { chatId },
         relations: ['chat'],
@@ -41,9 +56,11 @@ export class MessagesService {
       if (!messagesParent) {
         throw new NotFoundException();
       }
+      // Check if parent chat is branched or not
       const { chat } = messagesParent;
       const isBranchedChat = chat.parentId !== null;
 
+      // If not branched fetch all messages and send them
       if (!isBranchedChat) {
         const chatMessages = await this.messageRepository.find({
           where: { chatId },
@@ -52,11 +69,13 @@ export class MessagesService {
         return chatMessages;
       }
 
+      // If branched fetch message from parent chat from where branched
       const { branchedFromMsgId, parentId } = chat;
       const parentMessages = await this.messageRepository.find({
         where: { chatId: parentId as string },
         order: { createdAt: 'ASC' },
       });
+      // Find index from where chat was branched (BranchedFromMsgId)
       const branchedPointIndex = parentMessages.findIndex(
         (msg) => msg.id === branchedFromMsgId,
       );
@@ -65,10 +84,13 @@ export class MessagesService {
           'Branching message not found in parent chat',
         );
       }
+      // Filters messages before branching remove after branching
       const contextMessages = parentMessages.slice(0, branchedPointIndex + 1);
+      //Fetch current chat msgs
       const BranchedChatMessages = await this.messageRepository.find({
         where: { chatId },
       });
+      // Combine them and send
       const allMessages = [...contextMessages, ...BranchedChatMessages];
       return allMessages;
     } catch (error) {
@@ -127,6 +149,8 @@ export class MessagesService {
 
   async getPublicMessages(publicId: string) {
     try {
+      // Same from public chat unique endpoint to get public chat messages
+      // Passin publicId generatee after making chat public
       const chatId = Buffer.from(publicId, 'base64').toString('utf-8');
       const messages = await this.messageRepository.find({
         where: { chatId },

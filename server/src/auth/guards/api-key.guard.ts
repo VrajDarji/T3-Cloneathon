@@ -18,6 +18,7 @@ export class ApiKeyAuthGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
+    // Header finds for api_key and check user based on api key and authinticates
     const apiKey = request.headers['api_key'] || request.headers['x-api-key'];
 
     if (!apiKey) {

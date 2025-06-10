@@ -25,6 +25,8 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     return super.canActivate(context);
   }
 
+  // Simple auth guard on basis of accessToken and userId with logic of public routes
+
   handleRequest(err: any, user: any, info: any, context: ExecutionContext) {
     if (err || !user) {
       throw err || new UnauthorizedException('Authorization Required');
