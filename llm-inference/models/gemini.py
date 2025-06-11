@@ -154,7 +154,7 @@ class GeminiLLMServer:
         return {"error": "Session not found", "status": "error"}
 
 # Initialize LLM Server
-API_KEY = os.getenv('GEMINI_API_KEY', 'AIzaSyD7XllfyG-8evjUb1AWdR0veO_3zY_6YyA')
+API_KEY = os.getenv('GEMINI_API_KEY', 'your-api')
 llm_server = GeminiLLMServer(API_KEY)
 
 # Routes
