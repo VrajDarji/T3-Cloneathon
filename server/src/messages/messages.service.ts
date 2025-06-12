@@ -10,6 +10,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Message } from './entities/message.entity';
 import { Repository } from 'typeorm';
 import { WebSearchService } from 'src/web-search/web-search.service';
+import { AskMessageDto } from './dto/ask-message-dto';
+import axios from 'axios';
+import { ConfigService } from '@nestjs/config';
+import { SenderType } from './entities/senderType.enum';
 
 @Injectable()
 export class MessagesService {
@@ -17,11 +21,25 @@ export class MessagesService {
     @InjectRepository(Message)
     private readonly messageRepository: Repository<Message>,
     private readonly webSearchService: WebSearchService,
+    private readonly configService: ConfigService,
   ) {}
 
-  async webSearch(query: string) {
+  async create(createMessageDto: CreateMessageDto) {
+    try {
+      const message = this.messageRepository.create(createMessageDto);
+      return await this.messageRepository.save(message);
+    } catch (error) {
+      throw new HttpException(
+        `Failed to create message : ${error.message}`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  async webSearch(query: string, chatId: string) {
     try {
       const results = await this.webSearchService.searchDuckDuckGo(query);
+
       return results;
     } catch (error) {
       throw new HttpException(
@@ -31,13 +49,34 @@ export class MessagesService {
     }
   }
 
-  async create(createMessageDto: CreateMessageDto) {
+  async ask(askMessageDto: AskMessageDto) {
     try {
-      const message = this.messageRepository.create(createMessageDto);
-      return await this.messageRepository.save(message);
+      await this.create(askMessageDto);
+      const URL = this.configService.get('LLM_SERVER_URL') + `chat/send`;
+      console.log({ URL });
+
+      const payload = {
+        message: askMessageDto.content,
+        session_id: '7a2c65cb-00a4-4185-999d-f9a62082c774',
+      };
+
+      const { data } = await axios.post(URL, payload);
+      console.log({ data });
+
+      if (data) {
+        const createLlmMsgDto = {
+          chatId: askMessageDto.chatId,
+          senderType: SenderType.LLM,
+          content: data.response as string,
+          codeSnippet: false,
+          language: '',
+        };
+        await this.create(createLlmMsgDto);
+        return { msg: 'Response fetched succesfully' };
+      }
     } catch (error) {
       throw new HttpException(
-        `Failed to create message : ${error.message}`,
+        `Failed to generate response : ${error.message}`,
         HttpStatus.BAD_REQUEST,
       );
     }

@@ -19,6 +19,8 @@ import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { login } from "../api";
 import { useRouter } from "next/navigation";
+import { useProfileData } from "@/store";
+import { useShallow } from "zustand/react/shallow";
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -26,10 +28,19 @@ export default function LoginPage() {
   const [password, setPassword] = useState<string>("");
   const router = useRouter();
 
+  const [setData] = useProfileData(useShallow((state) => [state.setData]));
+
   const { mutate: loginFn, isPending } = useMutation({
     mutationFn: (data: { email: string; password: string }) => login(data),
     onSuccess: (data: any) => {
-      console.log({ data });
+      const { data: rspData } = data;
+      const { user } = rspData;
+      setData({
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        persona: user.persona,
+      });
       router.push("/");
     },
     onError: (error: any) => {

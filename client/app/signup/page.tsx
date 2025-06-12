@@ -1,39 +1,69 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { MessageSquare, Eye, EyeOff, Check } from "lucide-react"
-import { Separator } from "@/components/ui/separator"
+import { useState } from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { MessageSquare, Eye, EyeOff, Check, X } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import { useMutation } from "@tanstack/react-query";
+import { signUp } from "../api";
+import { useRouter } from "next/navigation";
 
 export default function SignupPage() {
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [password, setPassword] = useState("")
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [userData, setUserData] = useState<{
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
+    confirmPass: string;
+  }>({ firstName: "", lastName: "", email: "", password: "", confirmPass: "" });
 
   const passwordRequirements = [
-    { text: "At least 8 characters", met: password.length >= 8 },
-    { text: "Contains uppercase letter", met: /[A-Z]/.test(password) },
-    { text: "Contains lowercase letter", met: /[a-z]/.test(password) },
-    { text: "Contains number", met: /\d/.test(password) },
-  ]
+    { text: "At least 8 characters", met: userData.password.length >= 8 },
+    { text: "Contains uppercase letter", met: /[A-Z]/.test(userData.password) },
+    { text: "Contains lowercase letter", met: /[a-z]/.test(userData.password) },
+    { text: "Contains number", met: /\d/.test(userData.password) },
+  ];
+
+  const router = useRouter();
+
+  const { mutate: signUpFn, isPending } = useMutation({
+    mutationFn: (data: { name: string; email: string; password: string }) =>
+      signUp(data),
+    onSuccess: (data: any) => {
+      console.log({ data });
+      router.push("/login");
+    },
+    onError: (error: any) => {
+      console.log({ error });
+    },
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    // Simulate signup
-    setTimeout(() => {
-      setIsLoading(false)
-      // Redirect to main app
-      window.location.href = "/"
-    }, 1000)
-  }
+    e.preventDefault();
+    const data = {
+      name: userData.firstName + " " + userData.lastName,
+      email: userData.email,
+      password: userData.password,
+    };
+    console.log({ data });
+    signUpFn(data);
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-primary/5 to-purple-50 p-4 relative overflow-hidden">
@@ -46,23 +76,59 @@ export default function SignupPage() {
           <CardTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
             Create account
           </CardTitle>
-          <CardDescription>Join MultiLLM Chat and start conversations with AI</CardDescription>
+          <CardDescription>
+            Join MultiLLM Chat and start conversations with AI
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="firstName">First name</Label>
-                <Input id="firstName" placeholder="John" required />
+                <Input
+                  id="firstName"
+                  placeholder="John"
+                  required
+                  value={userData.firstName}
+                  onChange={(e) =>
+                    setUserData((prev) => ({
+                      ...prev,
+                      firstName: e.target.value,
+                    }))
+                  }
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="lastName">Last name</Label>
-                <Input id="lastName" placeholder="Doe" required />
+                <Input
+                  id="lastName"
+                  placeholder="Doe"
+                  required
+                  value={userData.lastName}
+                  onChange={(e) =>
+                    setUserData((prev) => ({
+                      ...prev,
+                      lastName: e.target.value,
+                    }))
+                  }
+                />
               </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="john@example.com" required />
+              <Input
+                id="email"
+                type="email"
+                placeholder="john@example.com"
+                required
+                value={userData.email}
+                onChange={(e) =>
+                  setUserData((prev) => ({
+                    ...prev,
+                    email: e.target.value,
+                  }))
+                }
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
@@ -71,8 +137,13 @@ export default function SignupPage() {
                   id="password"
                   type={showPassword ? "text" : "password"}
                   placeholder="Create a password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  value={userData.password}
+                  onChange={(e) =>
+                    setUserData((prevData) => ({
+                      ...prevData,
+                      password: e.target.value,
+                    }))
+                  }
                   required
                 />
                 <Button
@@ -82,15 +153,32 @@ export default function SignupPage() {
                   className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8"
                   onClick={() => setShowPassword(!showPassword)}
                 >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {showPassword ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
                 </Button>
               </div>
-              {password && (
+              {userData.password && (
                 <div className="space-y-2 mt-2">
                   {passwordRequirements.map((req, index) => (
-                    <div key={index} className="flex items-center gap-2 text-xs">
-                      <Check className={`w-3 h-3 ${req.met ? "text-green-500" : "text-muted-foreground"}`} />
-                      <span className={req.met ? "text-green-500" : "text-muted-foreground"}>{req.text}</span>
+                    <div
+                      key={index}
+                      className="flex items-center gap-2 text-xs"
+                    >
+                      <Check
+                        className={`w-3 h-3 ${
+                          req.met ? "text-green-500" : "text-muted-foreground"
+                        }`}
+                      />
+                      <span
+                        className={
+                          req.met ? "text-green-500" : "text-muted-foreground"
+                        }
+                      >
+                        {req.text}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -104,6 +192,19 @@ export default function SignupPage() {
                   type={showConfirmPassword ? "text" : "password"}
                   placeholder="Confirm your password"
                   required
+                  disabled={
+                    userData.password === "" ||
+                    !passwordRequirements.every(
+                      (requirement) => requirement.met
+                    )
+                  }
+                  value={userData.confirmPass}
+                  onChange={(e) =>
+                    setUserData((prev) => ({
+                      ...prev,
+                      confirmPass: e.target.value,
+                    }))
+                  }
                 />
                 <Button
                   type="button"
@@ -112,32 +213,36 @@ export default function SignupPage() {
                   className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 >
-                  {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {showConfirmPassword ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
                 </Button>
               </div>
-            </div>
-            <div className="flex items-center space-x-2">
-              <input type="checkbox" id="terms" className="rounded border-gray-300" required />
-              <Label htmlFor="terms" className="text-sm">
-                I agree to the{" "}
-                <Link href="/terms" className="text-primary hover:underline">
-                  Terms of Service
-                </Link>{" "}
-                and{" "}
-                <Link href="/privacy" className="text-primary hover:underline">
-                  Privacy Policy
-                </Link>
-              </Label>
+              {userData.password !== userData.confirmPass &&
+                userData.password &&
+                userData.confirmPass && (
+                  <div className="space-y-2 mt-2">
+                    <div className="flex items-center gap-2 text-xs">
+                      <X className="w-3 h-3 text-red-500" />
+                      <span className="text-red-500">
+                        Password didn&apos;t match
+                      </span>
+                    </div>
+                  </div>
+                )}
             </div>
             <Button
               type="submit"
               className="w-full gradient-primary text-white hover:opacity-90 transition-all duration-200 shadow-md hover:shadow-lg"
-              disabled={isLoading}
+              disabled={isLoading || isPending}
             >
-              {isLoading ? "Creating account..." : "Create account"}
+              {isLoading || isPending
+                ? "Creating account..."
+                : "Create account"}
             </Button>
           </form>
-        
         </CardContent>
         <CardFooter className="text-center">
           <p className="text-sm text-muted-foreground">
@@ -149,5 +254,5 @@ export default function SignupPage() {
         </CardFooter>
       </Card>
     </div>
-  )
+  );
 }
