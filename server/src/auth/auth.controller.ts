@@ -43,7 +43,7 @@ export class AuthController {
     );
     const cookieOptions: CookieOptions = {
       expires: cookieExpiry,
-      httpOnly: true,
+      // httpOnly: true,
       secure: NODE_ENV !== 'development',
       sameSite: NODE_ENV === 'development' ? 'lax' : 'none',
       path: '/',

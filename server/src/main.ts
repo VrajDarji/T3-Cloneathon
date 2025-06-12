@@ -17,7 +17,10 @@ async function bootstrap() {
       origin: string | undefined,
       callback: (error: Error | null, allow: boolean) => void,
     ) => {
-      const allowedOrigins = ['http://localhost:8001'];
+      const allowedOrigins = [
+        'http://localhost:8001',
+        'https://t3-cloneathon-mauve.vercel.app',
+      ];
 
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);

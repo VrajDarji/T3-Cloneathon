@@ -57,7 +57,7 @@ export class MessagesService {
 
       const payload = {
         message: askMessageDto.content,
-        session_id: '7a2c65cb-00a4-4185-999d-f9a62082c774',
+        session_id: '36bf921d-8983-41f1-9242-90d34c4f736d',
       };
 
       const { data } = await axios.post(URL, payload);
