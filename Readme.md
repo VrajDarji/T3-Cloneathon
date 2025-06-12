@@ -1,4 +1,4 @@
-# 🧠 T3 Chat Clone — Multi-LLM Chat App
+# 🧠🧠 T3 Chat Clone — Multi-LLM Chat App
 
 **T3 Chat Clone** is a powerful multi-agent AI chat application that lets users talk to various LLMs through a single, unified interface. Built using **Next.js** for the frontend, **NestJS** for the backend, and a **Python**-based LLM server.
 
