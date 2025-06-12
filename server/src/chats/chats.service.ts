@@ -40,12 +40,13 @@ export class ChatsService {
         const { status } = chatDataFilters;
         const users = await this.chatRepository.find({
           where: { userId, status },
+          order: { createdAt: 'DESC' },
         });
         return users;
       }
       const users = await this.chatRepository.find({
         where: { userId },
-        order: { createdAt: 'ASC' },
+        order: { createdAt: 'DESC' },
       });
       return users;
     } catch (error) {

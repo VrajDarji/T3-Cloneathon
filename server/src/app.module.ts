@@ -26,6 +26,9 @@ import { WebSearchModule } from './web-search/web-search.module';
         database: configService.get('DATABASE_NAME'),
         entities: [join(process.cwd(), 'dist/**/*.entity.js')],
         synchronize: false,
+        ssl: {
+          rejectUnauthorized: false,
+        },
       }),
     }),
     UsersModule,

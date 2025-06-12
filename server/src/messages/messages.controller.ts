@@ -15,6 +15,7 @@ import { CreateMessageDto } from './dto/create-message.dto';
 import { UpdateMessageDto } from './dto/update-message.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { Public } from 'src/auth/decorators/public.decorator';
+import { AskMessageDto } from './dto/ask-message-dto';
 
 @Controller('messages')
 @UseGuards(JwtAuthGuard)
@@ -24,6 +25,11 @@ export class MessagesController {
   @Post()
   async create(@Body() createMessageDto: CreateMessageDto) {
     return this.messagesService.create(createMessageDto);
+  }
+
+  @Post('/ask')
+  async ask(@Body() askMessageDto: AskMessageDto) {
+    return await this.messagesService.ask(askMessageDto);
   }
 
   @Get('chats/:chatId')
@@ -53,7 +59,7 @@ export class MessagesController {
   }
 
   @Post('web-search')
-  async webSearch(@Query('query') query: string) {
-    return await this.messagesService.webSearch(query);
+  async webSearch(@Query('query') query: string, @Body() chatId: string) {
+    return await this.messagesService.webSearch(query, chatId);
   }
 }
