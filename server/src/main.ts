@@ -17,7 +17,7 @@ async function bootstrap() {
       origin: string | undefined,
       callback: (error: Error | null, allow: boolean) => void,
     ) => {
-      const allowedOrigins = ['http://localhost:3000'];
+      const allowedOrigins = ['http://localhost:8001'];
 
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
