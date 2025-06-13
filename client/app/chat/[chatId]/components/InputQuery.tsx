@@ -91,30 +91,30 @@ const InputQuery = ({ chatId }: Props) => {
   };
 
   return (
-    <div className="border-t border-border/50 p-4 glass-effect">
-      <form onSubmit={handleSubmit} className="max-w-4xl mx-auto">
-        <div className="flex gap-2">
-          <Input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Type your message..."
-            className="flex-1 glass-effect border-0 shadow-sm focus:shadow-md transition-all duration-200"
-            disabled={isPending || isMsgLoading}
-          />
+    <form onSubmit={handleSubmit} className="relative">
+      <div className="relative flex items-center">
+        <Input
+          placeholder="Type your message..."
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          className="pr-20 rounded-full border-muted-foreground/20 focus-visible:ring-1 focus-visible:ring-offset-1 focus-visible:ring-purple-500"
+        />
+        <div className="absolute right-2 flex items-center gap-2">
+          {(isPending || isMsgLoading || isWbebSearchLoading) && (
+            <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+          )}
           <Button
+            size="icon"
             type="submit"
-            disabled={isPending || isMsgLoading}
-            className="gradient-primary text-white hover:opacity-90 transition-all duration-200 shadow-md hover:shadow-lg"
+            variant="ghost"
+            className="h-8 w-8 rounded-full hover:bg-purple-500 hover:text-white transition-colors"
+            disabled={!query.trim() || isPending || isMsgLoading}
           >
-            {isPending || isMsgLoading ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <Send className="w-4 h-4" />
-            )}
+            <Send className="h-4 w-4" />
           </Button>
         </div>
-      </form>
-    </div>
+      </div>
+    </form>
   );
 };
 

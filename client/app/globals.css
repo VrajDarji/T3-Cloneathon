@@ -161,11 +161,74 @@ body {
   }
 }
 
-@layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
+/* Markdown Styling */
+.prose {
+  @apply text-foreground;
+}
+
+.prose p {
+  @apply mb-4 leading-7;
+}
+
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4 {
+  font-weight: 600;
+  color: hsl(var(--foreground));
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+
+.prose h1 {
+  @apply text-3xl;
+}
+
+.prose h2 {
+  @apply text-2xl;
+}
+
+.prose h3 {
+  @apply text-xl;
+}
+
+.prose h4 {
+  @apply text-lg;
+}
+
+.prose code:not(pre code) {
+  @apply bg-muted px-1.5 py-0.5 rounded-md text-sm;
+}
+
+.prose pre {
+  @apply my-4 overflow-x-auto rounded-lg bg-muted/50 p-4;
+}
+
+.prose ul {
+  @apply my-4 list-disc pl-6;
+}
+
+.prose ol {
+  @apply my-4 list-decimal pl-6;
+}
+
+.prose blockquote {
+  @apply border-l-4 border-muted-foreground/20 pl-4 italic my-4;
+}
+
+.prose a {
+  @apply text-primary hover:underline;
+}
+
+.prose table {
+  @apply w-full my-4 border-collapse;
+}
+
+.prose th,
+.prose td {
+  @apply border border-muted-foreground/20 p-2;
+}
+
+.prose hr {
+  @apply my-8 border-muted-foreground/20;
 }

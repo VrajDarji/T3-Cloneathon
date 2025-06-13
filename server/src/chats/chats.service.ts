@@ -133,27 +133,54 @@ export class ChatsService {
       );
     }
   }
-
   async makePublicRoute(chatId: string) {
     try {
-      const chat = await this.findOne(chatId);
-      if (!chat) {
-        throw new NotFoundException();
-      }
       // Find chat which we want to make public
-      // Mark it as public
+      const chat = await this.chatRepository.findOne({
+        where: { id: chatId },
+      });
+
+      if (!chat) {
+        throw new NotFoundException('Chat not found');
+      }
+
+      const publicId = Buffer.from(chatId).toString('base64');
+
+      // Check if chat is already public
+      if (chat.isPublic) {
+        return {
+          publicId,
+          message: 'Chat is already public',
+        };
+      }
+
+      // Check if chat is from a branch
+      if (chat.parentId) {
+        const updateData = { isPublic: true };
+        await this.update(chatId, updateData);
+
+        return {
+          publicId,
+          warning: 'Note: This is a branched chat',
+        };
+      }
+
+      // Mark chat as public
       const updateData = {
         isPublic: true,
       };
       await this.update(chatId, updateData);
 
-      // Create a one time access only publicId from which chat can be accessed
-      // On Interface for usage generate a new route public / publicId
-      const publicId = Buffer.from(chatId).toString('base64');
-      return { publicId };
+      return {
+        publicId,
+        message: 'Chat has been made public successfully',
+      };
     } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
       throw new HttpException(
-        `Error making route public ${error.message}`,
+        `Error making route public: ${error.message}`,
         HttpStatus.BAD_REQUEST,
       );
     }

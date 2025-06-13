@@ -57,7 +57,7 @@ export class MessagesService {
 
       const payload = {
         message: askMessageDto.content,
-        session_id: '36bf921d-8983-41f1-9242-90d34c4f736d',
+        session_id: '346f0591-9e5d-408d-8a48-5ae446c1a00a',
       };
 
       const { data } = await axios.post(URL, payload);
@@ -185,20 +185,43 @@ export class MessagesService {
       );
     }
   }
-
   async getPublicMessages(publicId: string) {
     try {
-      // Same from public chat unique endpoint to get public chat messages
-      // Passin publicId generatee after making chat public
+      // Decode the base64 public ID to get the original chat ID
       const chatId = Buffer.from(publicId, 'base64').toString('utf-8');
+
+      // First find the messages with relations to chat to verify if chat is public
+      const message = await this.messageRepository.findOne({
+        where: { chatId },
+        relations: ['chat'],
+      });
+
+      if (!message || !message.chat) {
+        throw new NotFoundException('Chat not found');
+      }
+
+      if (!message.chat.isPublic) {
+        throw new HttpException(
+          'This chat is not public',
+          HttpStatus.FORBIDDEN,
+        );
+      }
+
+      // If chat exists and is public, fetch all messages
       const messages = await this.messageRepository.find({
         where: { chatId },
         order: { createdAt: 'ASC' },
       });
       return messages;
     } catch (error) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof HttpException
+      ) {
+        throw error;
+      }
       throw new HttpException(
-        `Error fetching messages ${error.message}`,
+        `Error fetching messages: ${error.message}`,
         HttpStatus.BAD_REQUEST,
       );
     }
