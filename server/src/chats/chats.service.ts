@@ -10,16 +10,46 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Chat, chatDataFiltersDto } from './entities/chat.entity';
 import { Repository } from 'typeorm';
 import { Status } from './entities/status.enum';
+import { ConfigService } from '@nestjs/config';
+import axios from 'axios';
 
 @Injectable()
 export class ChatsService {
   constructor(
     @InjectRepository(Chat)
     private readonly chatRepository: Repository<Chat>,
+    private readonly configService: ConfigService,
   ) {}
+
+  async createSessionId(model_name: string) {
+    try {
+      const URL = this.configService.get('LLM_SERVER_URL') + 'chat/create';
+      const payload = {
+        model_name: model_name || 'gemini-1.5-flash-latest',
+      };
+      const { data } = await axios.post(URL, payload);
+      if (!data.session_id) {
+        throw new HttpException(
+          'Error creating session',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      return { sessionId: data.session_id };
+    } catch (error) {
+      throw new HttpException(
+        `Failed to create session ${error.message}`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
 
   async create(createChatDto: CreateChatDto) {
     try {
+      const { sessionId } = await this.createSessionId(
+        'gemini-1.5-flash-latest',
+      );
+      createChatDto.sessionId = sessionId;
+
       const chat = this.chatRepository.create(createChatDto);
       return await this.chatRepository.save(chat);
     } catch (error) {
@@ -115,10 +145,14 @@ export class ChatsService {
       }
       // Find parent and give branched a title branched from
       const newTitle = `Branched from -  ${parentChat.title}`;
+      const { sessionId } = await this.createSessionId(
+        'gemini-1.5-flash-latest',
+      );
       const createData: CreateChatDto = {
         title: newTitle,
         parentId,
         userId,
+        sessionId,
         branchedFromMsgId,
         isPublic: false,
         status: Status.ACTIVE,

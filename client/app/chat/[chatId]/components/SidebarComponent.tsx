@@ -1,5 +1,6 @@
 "use client";
 
+import { signOut } from "@/app/api";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -8,8 +9,10 @@ import {
   SidebarContent,
   SidebarHeader,
 } from "@/components/ui/sidebar";
+import UserModal from "@/components/UserModal";
 import { cn } from "@/lib/utils";
-import { useChatData } from "@/store";
+import { useChatData, useModal } from "@/store";
+import { useMutation } from "@tanstack/react-query";
 import { LogOut, MessageSquare, Plus, Settings } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useShallow } from "zustand/react/shallow";
@@ -22,6 +25,23 @@ type Props = {
 const SidebarComponent = ({ activeId, isOpen }: Props) => {
   const [chatHistory] = useChatData(useShallow((state) => [state.data]));
   const router = useRouter();
+
+  const [setOpen] = useModal(useShallow((state) => [state.setOpen]));
+
+  const { mutate } = useMutation({
+    mutationFn: () => signOut(),
+    onSuccess: () => {
+      router.push("/login");
+    },
+    onError: (error: any) => {
+      console.log({ error });
+    },
+  });
+
+  const handleLogout = () => {
+    mutate();
+  };
+
   return (
     <Sidebar
       className={cn(
@@ -38,8 +58,6 @@ const SidebarComponent = ({ activeId, isOpen }: Props) => {
             MultiLLM Chat
           </span>
         </div>
-      </SidebarHeader>
-      <SidebarContent>
         <div className="p-4">
           <Button
             className="w-full justify-start gap-2 gradient-primary text-white hover:opacity-90 transition-all duration-200 shadow-md hover:shadow-lg"
@@ -50,8 +68,10 @@ const SidebarComponent = ({ activeId, isOpen }: Props) => {
             New Chat
           </Button>
         </div>
+      </SidebarHeader>
+      <SidebarContent>
         <Separator />
-        <div className="p-4">
+        <div className="p-4 flex flex-grow flex-col max-h-[85%] hide-scrollbar overflow-y-auto">
           <h3 className="text-sm font-medium text-muted-foreground mb-3">
             {chatHistory.length === 0
               ? "Your chats will appear here"
@@ -69,19 +89,34 @@ const SidebarComponent = ({ activeId, isOpen }: Props) => {
                 }}
               >
                 <div className="text-sm font-medium truncate">{chat.title}</div>
-                <div className="text-xs text-muted-foreground">
+                {/* <div className="text-xs text-muted-foreground">
                   {chat.createdAt}
-                </div>
+                </div> */}
               </Card>
             ))}
           </div>
         </div>
-        <div className="mt-auto p-4 space-y-2">
-          <Button variant="ghost" className="w-full justify-start gap-2">
+        <div className="mt-auto p-4 space-y-2 absolute bottom-0 left-0">
+          <Button
+            variant="ghost"
+            className="w-full justify-start gap-2"
+            onClick={() =>
+              setOpen(
+                <UserModal
+                  title="Edit User Details"
+                  subheading="Update your display name and persona."
+                />
+              )
+            }
+          >
             <Settings className="w-4 h-4" />
             Settings
           </Button>
-          <Button variant="ghost" className="w-full justify-start gap-2">
+          <Button
+            variant="ghost"
+            className="w-full justify-start gap-2"
+            onClick={handleLogout}
+          >
             <LogOut className="w-4 h-4" />
             Sign Out
           </Button>

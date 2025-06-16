@@ -100,9 +100,6 @@ const InputQuery = ({ chatId }: Props) => {
           className="pr-20 rounded-full border-muted-foreground/20 focus-visible:ring-1 focus-visible:ring-offset-1 focus-visible:ring-purple-500"
         />
         <div className="absolute right-2 flex items-center gap-2">
-          {(isPending || isMsgLoading || isWbebSearchLoading) && (
-            <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
-          )}
           <Button
             size="icon"
             type="submit"
@@ -110,7 +107,11 @@ const InputQuery = ({ chatId }: Props) => {
             className="h-8 w-8 rounded-full hover:bg-purple-500 hover:text-white transition-colors"
             disabled={!query.trim() || isPending || isMsgLoading}
           >
-            <Send className="h-4 w-4" />
+            {isPending || isMsgLoading || isWbebSearchLoading ? (
+              <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+            ) : (
+              <Send className="h-4 w-4" />
+            )}
           </Button>
         </div>
       </div>

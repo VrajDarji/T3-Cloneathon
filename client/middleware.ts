@@ -7,8 +7,6 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const user = request.cookies.get("userId")?.value;
 
-  console.log({ user, pathname });
-
   const isPublic =
     pathname === "/" ||
     PUBLIC_ROUTES.some((route) => route !== "/" && pathname.startsWith(route));
@@ -18,7 +16,6 @@ export function middleware(request: NextRequest) {
       const chatUrl = new URL("/chat", request.url);
       return NextResponse.redirect(chatUrl);
     }
-    console.log("Inside this");
 
     return NextResponse.next();
   }

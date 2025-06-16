@@ -1,9 +1,8 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
-import Message from "./Message";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Loader2 } from "lucide-react";
+import { useEffect, useRef } from "react";
+import Message from "./Message";
 
 interface ChatAreaProps {
   chats: Array<{
@@ -36,7 +35,7 @@ const ChatArea = ({ chats, isLoading }: ChatAreaProps) => {
       ) : (
         <div ref={scrollRef} className="h-full overflow-y-auto">
           <div className="min-h-full w-full px-4">
-            <div className="space-y-6 py-4 mx-auto">
+            <div className="space-y-6 py-4 mx-28">
               {chats.map((chat) => (
                 <Message
                   key={chat.id}

@@ -14,24 +14,15 @@ const Page = ({ params }: Props) => {
 
   const [chats, setChats] = useState<
     { senderType: "user" | "llm"; content: string; id: string }[]
-  >([]);  const { data, isLoading, error } = useQuery({
+  >([]);
+  const { data, isLoading, error } = useQuery({
     queryKey: ["allMsgs", chatId],
-    queryFn: async () => {
-      try {
-        console.log('Fetching messages for chatId:', chatId); // Debug log
-        const response = await getAllMsg(chatId);
-        console.log('Response:', response); // Debug log
-        return response;
-      } catch (err) {
-        console.error('Error in query:', err);
-        throw err;
-      }
-    },
+    queryFn: () => getAllMsg(chatId),
     enabled: !!chatId && chatId !== "new",
     staleTime: 0,
     refetchOnWindowFocus: false,
     refetchOnMount: true,
-    retry: 1
+    retry: 1,
   });
   useEffect(() => {
     setChats([]);
@@ -44,10 +35,9 @@ const Page = ({ params }: Props) => {
           content: msg.content,
           id: msg.id,
         }));
-        console.log('Setting messages:', messages); // Debug log
         setChats(messages);
       } else {
-        console.error('Unexpected response format:', rspData);
+        console.error("Unexpected response format:", rspData);
       }
     }
   }, [data, chatId]);
@@ -55,7 +45,9 @@ const Page = ({ params }: Props) => {
     <>
       {error ? (
         <div className="w-full h-full flex items-center justify-center flex-col row-gap-4">
-          <p className="text-md text-red-500">Error loading messages. Please try again.</p>
+          <p className="text-md text-red-500">
+            Error loading messages. Please try again.
+          </p>
         </div>
       ) : (isLoading || !data) && chatId !== "new" ? (
         <div className="w-full h-full flex items-center justify-center flex-col row-gap-4">
@@ -63,10 +55,7 @@ const Page = ({ params }: Props) => {
           <p className="text-md text-purple-500">Loading messages...</p>
         </div>
       ) : (
-        <ChatArea 
-          chats={chats} 
-          isLoading={isLoading} 
-        />
+        <ChatArea chats={chats} isLoading={isLoading} />
       )}
     </>
   );

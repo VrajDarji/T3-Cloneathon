@@ -28,12 +28,10 @@ export default function ChatPage({ params, children }: Props) {
           <Header setIsOpen={setIsOpen} />
 
           {/* Messages Area - Takes all available space */}
-          <div className="flex-1 overflow-hidden relative">
-            {children}
-          </div>
+          <div className="flex-1 overflow-hidden relative">{children}</div>
 
           {/* Input Area - Fixed at bottom */}
-          <div className="border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/75">
+          <div className="border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/75 flex items-center justify-center glass-effect">
             <div className="container max-w-3xl py-4">
               <InputQuery chatId={chatId !== "new" ? chatId : ""} />
             </div>

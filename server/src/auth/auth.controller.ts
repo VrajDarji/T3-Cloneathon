@@ -14,8 +14,6 @@ export class AuthController {
 
   @Post('sign-up')
   async signUp(@Body() signUpDto: SignUpDto) {
-    console.log({ signUpDto });
-
     await this.authService.signUp(signUpDto);
   }
 
@@ -29,6 +27,13 @@ export class AuthController {
     this.assignCookieToResponse(response, accessToken, user.id);
 
     return { accessToken, user };
+  }
+
+  @Post('sign-out')
+  signOut(@Res({ passthrough: true }) response: Response) {
+    response.clearCookie('userId', { path: '/' });
+    response.clearCookie('accessToken', { path: '/' });
+    return { msg: 'Logout successfull' };
   }
 
   private assignCookieToResponse(

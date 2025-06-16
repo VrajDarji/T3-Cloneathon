@@ -14,6 +14,20 @@ export const signUp = async (data: {
   return await axios.post(`auth/sign-up`, data);
 };
 
+export const signOut = async () => {
+  return await axios.post(`auth/sign-out`);
+};
+
+// User endpoints
+
+export const updateUser = async (data: {
+  id: string;
+  name: string;
+  persona: string;
+}) => {
+  return await axios.patch(`users/${data.id}`, data);
+};
+
 // Chat endpoints
 
 export const getAllChats = async (userId: string) => {
@@ -38,13 +52,13 @@ export const createBranch = async (data: {
     // Add error handling and proper request configuration
     const response = await axios.post(`chats/branch`, data, {
       headers: {
-        'Content-Type': 'application/json'
+        "Content-Type": "application/json",
       },
-      withCredentials: true
+      withCredentials: true,
     });
     return response;
   } catch (error) {
-    console.error('Branch creation error:', error);
+    console.error("Branch creation error:", error);
     throw error;
   }
 };
@@ -55,13 +69,13 @@ export const getAllMsg = async (chatId: string) => {
   try {
     const response = await axios.get(`messages/chats/${chatId}`, {
       headers: {
-        'Content-Type': 'application/json'
+        "Content-Type": "application/json",
       },
-      withCredentials: true
+      withCredentials: true,
     });
     return response;
   } catch (error) {
-    console.error('Error fetching messages:', error);
+    console.error("Error fetching messages:", error);
     throw error;
   }
 };

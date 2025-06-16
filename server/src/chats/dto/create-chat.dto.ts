@@ -18,5 +18,8 @@ export class CreateChatDto {
   parentId: string;
 
   @IsOptional()
+  sessionId: string;
+
+  @IsOptional()
   branchedFromMsgId: string;
 }

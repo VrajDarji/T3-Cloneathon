@@ -46,7 +46,6 @@ export default function SignupPage() {
     mutationFn: (data: { name: string; email: string; password: string }) =>
       signUp(data),
     onSuccess: (data: any) => {
-      console.log({ data });
       router.push("/login");
     },
     onError: (error: any) => {
@@ -61,7 +60,6 @@ export default function SignupPage() {
       email: userData.email,
       password: userData.password,
     };
-    console.log({ data });
     signUpFn(data);
   };
 

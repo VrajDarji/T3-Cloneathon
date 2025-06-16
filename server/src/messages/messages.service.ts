@@ -14,6 +14,7 @@ import { AskMessageDto } from './dto/ask-message-dto';
 import axios from 'axios';
 import { ConfigService } from '@nestjs/config';
 import { SenderType } from './entities/senderType.enum';
+import { Chat } from 'src/chats/entities/chat.entity';
 
 @Injectable()
 export class MessagesService {
@@ -22,6 +23,8 @@ export class MessagesService {
     private readonly messageRepository: Repository<Message>,
     private readonly webSearchService: WebSearchService,
     private readonly configService: ConfigService,
+    @InjectRepository(Chat)
+    private readonly chatRepository: Repository<Chat>,
   ) {}
 
   async create(createMessageDto: CreateMessageDto) {
@@ -53,15 +56,17 @@ export class MessagesService {
     try {
       await this.create(askMessageDto);
       const URL = this.configService.get('LLM_SERVER_URL') + `chat/send`;
-      console.log({ URL });
+
+      const chatData = await this.chatRepository.findOne({
+        where: { id: askMessageDto.chatId },
+      });
 
       const payload = {
         message: askMessageDto.content,
-        session_id: '346f0591-9e5d-408d-8a48-5ae446c1a00a',
+        session_id: chatData?.sessionId,
       };
 
       const { data } = await axios.post(URL, payload);
-      console.log({ data });
 
       if (data) {
         const createLlmMsgDto = {
@@ -85,19 +90,18 @@ export class MessagesService {
   async findAllByChatId(chatId: string) {
     try {
       if (!chatId) {
-        throw new NotFoundException();
+        throw new NotFoundException('Chat not found');
       }
       // Find messageParent
-      const messagesParent = await this.messageRepository.findOne({
-        where: { chatId },
-        relations: ['chat'],
+      const messagesParent = await this.chatRepository.findOne({
+        where: { id: chatId },
       });
+
       if (!messagesParent) {
-        throw new NotFoundException();
+        throw new NotFoundException('Chat not found');
       }
       // Check if parent chat is branched or not
-      const { chat } = messagesParent;
-      const isBranchedChat = chat.parentId !== null;
+      const isBranchedChat = messagesParent.parentId !== null;
 
       // If not branched fetch all messages and send them
       if (!isBranchedChat) {
@@ -109,11 +113,12 @@ export class MessagesService {
       }
 
       // If branched fetch message from parent chat from where branched
-      const { branchedFromMsgId, parentId } = chat;
+      const { branchedFromMsgId, parentId } = messagesParent;
       const parentMessages = await this.messageRepository.find({
         where: { chatId: parentId as string },
         order: { createdAt: 'ASC' },
       });
+
       // Find index from where chat was branched (BranchedFromMsgId)
       const branchedPointIndex = parentMessages.findIndex(
         (msg) => msg.id === branchedFromMsgId,

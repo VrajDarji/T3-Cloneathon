@@ -1,115 +1,115 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Bot, Check, Copy, GitBranch, Loader2, User } from 'lucide-react';
-import { useParams, useRouter } from 'next/navigation';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { createBranch } from '@/app/api';
-import { useProfileData, useChatData } from '@/store';
-import { useShallow } from 'zustand/react/shallow';
+import React, { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Bot, Check, Copy, GitBranch, Loader2, User } from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { createBranch } from "@/app/api";
+import { useProfileData, useChatData } from "@/store";
+import { useShallow } from "zustand/react/shallow";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@/components/ui/tooltip';
-import { PrismLight as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { oneDark } from 'react-syntax-highlighter/dist/cjs/styles/prism';
-import javascript from 'react-syntax-highlighter/dist/cjs/languages/prism/javascript';
-import typescript from 'react-syntax-highlighter/dist/cjs/languages/prism/typescript';
-import python from 'react-syntax-highlighter/dist/cjs/languages/prism/python';
-import bash from 'react-syntax-highlighter/dist/cjs/languages/prism/bash';
-import json from 'react-syntax-highlighter/dist/cjs/languages/prism/json';
-import ReactMarkdown from 'react-markdown';
+} from "@/components/ui/tooltip";
+import { PrismLight as SyntaxHighlighter } from "react-syntax-highlighter";
+import { oneDark } from "react-syntax-highlighter/dist/cjs/styles/prism";
+import javascript from "react-syntax-highlighter/dist/cjs/languages/prism/javascript";
+import typescript from "react-syntax-highlighter/dist/cjs/languages/prism/typescript";
+import python from "react-syntax-highlighter/dist/cjs/languages/prism/python";
+import bash from "react-syntax-highlighter/dist/cjs/languages/prism/bash";
+import json from "react-syntax-highlighter/dist/cjs/languages/prism/json";
+import ReactMarkdown from "react-markdown";
+import { oneLight } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { useTheme } from "next-themes";
 
 // Register commonly used languages
-SyntaxHighlighter.registerLanguage('js', javascript);
-SyntaxHighlighter.registerLanguage('javascript', javascript);
-SyntaxHighlighter.registerLanguage('ts', typescript);
-SyntaxHighlighter.registerLanguage('typescript', typescript);
-SyntaxHighlighter.registerLanguage('py', python);
-SyntaxHighlighter.registerLanguage('python', python);
-SyntaxHighlighter.registerLanguage('bash', bash);
-SyntaxHighlighter.registerLanguage('sh', bash);
-SyntaxHighlighter.registerLanguage('json', json);
+SyntaxHighlighter.registerLanguage("js", javascript);
+SyntaxHighlighter.registerLanguage("javascript", javascript);
+SyntaxHighlighter.registerLanguage("ts", typescript);
+SyntaxHighlighter.registerLanguage("typescript", typescript);
+SyntaxHighlighter.registerLanguage("py", python);
+SyntaxHighlighter.registerLanguage("python", python);
+SyntaxHighlighter.registerLanguage("bash", bash);
+SyntaxHighlighter.registerLanguage("sh", bash);
+SyntaxHighlighter.registerLanguage("json", json);
 
 interface MessageProps {
   content: string;
-  senderType: 'user' | 'llm';
+  senderType: "user" | "llm";
   id: string;
 }
 
 const Message = ({ content, senderType, id }: MessageProps) => {
   const [copied, setCopied] = useState(false);
-  const [codeBlockCopied, setCodeBlockCopied] = useState<{[key: string]: boolean}>({});
+  const [codeBlockCopied, setCodeBlockCopied] = useState<{
+    [key: string]: boolean;
+  }>({});
   const [user] = useProfileData(useShallow((state) => [state.data]));
-  const [oldChatData, setChatData] = useChatData(useShallow((state) => [state.data, state.setData]));
+  const [oldChatData, setChatData] = useChatData(
+    useShallow((state) => [state.data, state.setData])
+  );
   const params = useParams<{ chatId: string }>();
   const router = useRouter();
-  const queryClient = useQueryClient();  const { mutate: branchChat, isPending } = useMutation({
-    mutationFn: async () => {
-      try {
-        return await createBranch({
-          userId: user.id,
-          parentId: params.chatId as string,
-          branchedFromMsgId: id
-        });
-      } catch (error) {
-        console.error('Branch creation mutation error:', error);
-        throw error;
-      }
-    },    onSuccess: (data: any) => {
-      try {
-        const { data: rspData } = data;
-        console.log('Branch created:', rspData); // Debug log
-        
-        // Add new chat to state
-        const chatData = [
-          { 
-            id: rspData.id, 
-            title: rspData.title, 
-            createdAt: rspData.createdAt,
-            parentId: params.chatId,
-            branchedFromMsgId: id
-          },
-          ...oldChatData,
-        ];
-        setChatData(chatData);
-        
-        // Invalidate queries to refresh the data
-        queryClient.invalidateQueries({ queryKey: ["userChats", user.id] });
-        queryClient.invalidateQueries({ queryKey: ["allMsgs"] });
-        
-        // Wait a short moment for the state to update
-        setTimeout(() => {
-          // Navigate to new chat and ensure data is fresh
-          router.push(`/chat/${rspData.id}`);
-        }, 100);
-      } catch (error) {
-        console.error('Error in branch success handler:', error);
-      }
+
+  const queryClient = useQueryClient();
+
+  const { theme } = useTheme();
+
+  const { mutate: branchChat, isPending } = useMutation({
+    mutationFn: (data: {
+      userId: string;
+      parentId: string;
+      branchedFromMsgId: string;
+    }) => createBranch(data),
+    onSuccess: (data: any) => {
+      const { data: rspData } = data;
+
+      // Add new chat to state
+      const chatData = [
+        {
+          id: rspData.id,
+          title: rspData.title,
+          createdAt: rspData.createdAt,
+          parentId: params.chatId,
+          branchedFromMsgId: id,
+        },
+        ...oldChatData,
+      ];
+      setChatData(chatData);
+
+      // Invalidate queries to refresh the data
+      queryClient.invalidateQueries({ queryKey: ["userChats", user.id] });
+      queryClient.invalidateQueries({ queryKey: ["allMsgs"] });
+
+      // Wait a short moment for the state to update
+      setTimeout(() => {
+        // Navigate to new chat and ensure data is fresh
+        router.push(`/chat/${rspData.id}`);
+      }, 100);
     },
     onError: (error) => {
-      console.error('Failed to create branch:', error);
-    }
+      console.error("Failed to create branch:", error);
+    },
   });
 
   const handleCopy = async (text: string, blockId?: string) => {
     try {
       await navigator.clipboard.writeText(text);
       if (blockId) {
-        setCodeBlockCopied(prev => ({ ...prev, [blockId]: true }));
+        setCodeBlockCopied((prev) => ({ ...prev, [blockId]: true }));
         setTimeout(() => {
-          setCodeBlockCopied(prev => ({ ...prev, [blockId]: false }));
+          setCodeBlockCopied((prev) => ({ ...prev, [blockId]: false }));
         }, 2000);
       } else {
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
       }
     } catch (err) {
-      console.error('Failed to copy text: ', err);
+      console.error("Failed to copy text: ", err);
     }
   };
 
@@ -120,9 +120,14 @@ const Message = ({ content, senderType, id }: MessageProps) => {
       onClick={(e) => {
         e.preventDefault();
         try {
-          branchChat();
+          const data = {
+            userId: user.id,
+            parentId: params.chatId,
+            branchedFromMsgId: id,
+          };
+          branchChat(data);
         } catch (error) {
-          console.error('Error triggering branch:', error);
+          console.error("Error triggering branch:", error);
         }
       }}
       disabled={isPending}
@@ -177,44 +182,50 @@ const Message = ({ content, senderType, id }: MessageProps) => {
         handleCopy(codeContent, blockId);
       }}
     >
-      {codeBlockCopied[blockId] ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+      {codeBlockCopied[blockId] ? (
+        <Check className="h-4 w-4" />
+      ) : (
+        <Copy className="h-4 w-4" />
+      )}
     </button>
   );
 
   return (
     <div
-      className={`w-full max-w-4xl mx-auto ${
-        senderType === 'user' ? 'flex justify-end' : 'flex justify-start'
+      className={`flex w-full ${
+        senderType === "user" ? "justify-end" : "justify-start"
       }`}
     >
       <div
-        className={`flex gap-4 max-w-[85%] ${
-          senderType === 'llm'
-            ? 'bg-muted/30 py-6 px-4 rounded-lg'
-            : 'py-4 px-4 bg-primary/10 rounded-lg'
-        } ${senderType === 'user' ? 'flex-row-reverse' : 'flex-row'}`}
+        className={`gap-4  ${
+          senderType === "llm"
+            ? "bg-muted/30 py-6 px-4 rounded-lg flex w-full sm:max-w-[85%]"
+            : "bg-primary/10 py-1 px-4 rounded-lg inline-flex max-w-fit"
+        } ${senderType === "user" ? "flex-row-reverse" : "flex-row"}`}
       >
         <Avatar className="h-8 w-8 shrink-0">
-          <AvatarFallback 
-            className={
-              senderType === 'llm' 
-                ? 'bg-gradient-to-br from-purple-600 to-indigo-600 text-white'
-                : 'bg-gradient-to-br from-green-600 to-teal-600 text-white'
-            }
+          <AvatarFallback
+            className={`text-white ${
+              senderType === "llm"
+                ? "bg-gradient-to-br from-purple-600 to-indigo-600"
+                : "bg-gradient-to-br from-green-600 to-teal-600"
+            }`}
           >
-            {senderType === 'llm' ? <Bot className="h-4 w-4" /> : <User className="h-4 w-4" />}
+            {senderType === "llm" ? (
+              <Bot className="h-4 w-4" />
+            ) : (
+              <User className="h-4 w-4" />
+            )}
           </AvatarFallback>
         </Avatar>
-        
-        <div className={`flex-1 space-y-4 ${senderType === 'user' ? 'text-right' : 'text-left'}`}>
-          <div className={`prose prose-neutral dark:prose-invert max-w-none ${
-            senderType === 'user' ? 'text-right' : 'text-left'
-          }`}>
+
+        <div className="flex-1 space-y-4 text-left break-words">
+          <div className="prose prose-neutral dark:prose-invert max-w-[120ch]">
             <ReactMarkdown
               components={{
                 code({ className, children, ...props }) {
-                  const match = /language-(\w+)/.exec(className || '');
-                  const codeContent = String(children).replace(/\n$/, '');
+                  const match = /language-(\w+)/.exec(className || "");
+                  const codeContent = String(children).replace(/\n$/, "");
                   const blockId = Math.random().toString(36).substr(2, 9);
 
                   if (match) {
@@ -223,9 +234,12 @@ const Message = ({ content, senderType, id }: MessageProps) => {
                         {renderCodeCopyButton(codeContent, blockId)}
                         <div className="rounded-md overflow-hidden bg-muted/50">
                           <SyntaxHighlighter
-                            style={oneDark}
+                            style={theme === "dark" ? oneDark : oneLight}
                             language={match[1]}
-                            customStyle={{ margin: 0, background: 'transparent' }}
+                            customStyle={{
+                              margin: 0,
+                              background: "transparent",
+                            }}
                             PreTag="div"
                             showLineNumbers={true}
                             wrapLines={true}
@@ -247,8 +261,8 @@ const Message = ({ content, senderType, id }: MessageProps) => {
               {content}
             </ReactMarkdown>
           </div>
-          
-          {senderType === 'llm' && content.trim().length > 0 && (
+
+          {senderType === "llm" && content.trim().length > 0 && (
             <div className="flex items-center gap-2">
               {renderCopyButton()}
               <TooltipProvider>
@@ -256,9 +270,7 @@ const Message = ({ content, senderType, id }: MessageProps) => {
                   <TooltipTrigger asChild>
                     {renderBranchButton()}
                   </TooltipTrigger>
-                  <TooltipContent>
-                    Branch from this message
-                  </TooltipContent>
+                  <TooltipContent>Branch from this message</TooltipContent>
                 </Tooltip>
               </TooltipProvider>
             </div>
