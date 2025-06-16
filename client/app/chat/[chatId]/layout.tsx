@@ -1,14 +1,10 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { Send } from "lucide-react";
 import React, { use, useState } from "react";
 import Header from "./components/Header";
 import SidebarComponent from "./components/SidebarComponent";
-import { useSidebar } from "@/components/sidebar";
 import InputQuery from "./components/InputQuery";
 
 type Props = {
@@ -19,22 +15,27 @@ type Props = {
 export default function ChatPage({ params, children }: Props) {
   const { chatId } = use(params);
   const [isOpen, setIsOpen] = useState<boolean>(true);
-  const userId = "";
 
   return (
     <SidebarProvider>
-      <div className="grid h-screen w-full bg-gradient-to-br from-background via-background to-muted/30 grid-cols-[auto_1fr] relative">
+      <div className="grid h-screen w-full bg-gradient-to-br from-background via-background to-muted/30 grid-cols-[auto_1fr]">
         {/* Sidebar */}
         <SidebarComponent activeId={chatId} isOpen={isOpen} />
+
         {/* Main Chat Area */}
-        <div className="flex-1 flex flex-col relative">
+        <div className="flex flex-col h-screen relative">
           {/* Header */}
           <Header setIsOpen={setIsOpen} />
-          {/* Messages Area */}
-          <ScrollArea className="flex-1 p-4">{children}</ScrollArea>
 
-          {/* Input Area */}
-          <InputQuery chatId={chatId !== "new" ? chatId : ""} />
+          {/* Messages Area - Takes all available space */}
+          <div className="flex-1 overflow-hidden relative">{children}</div>
+
+          {/* Input Area - Fixed at bottom */}
+          <div className="border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/75 flex items-center justify-center glass-effect">
+            <div className="container max-w-3xl py-4">
+              <InputQuery chatId={chatId !== "new" ? chatId : ""} />
+            </div>
+          </div>
         </div>
       </div>
     </SidebarProvider>

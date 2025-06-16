@@ -49,6 +49,9 @@ export class Chat {
   })
   status: Status;
 
+  @Column({ name: 'session_id', type: 'varchar' })
+  sessionId: string;
+
   @Column({ name: 'is_public', type: 'boolean', default: false })
   isPublic: boolean;
 

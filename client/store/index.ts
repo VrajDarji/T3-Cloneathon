@@ -47,3 +47,28 @@ export const useChatData = create<chatStoreTypes>()(
     }
   )
 );
+
+type ModalContextType = {
+  data: any;
+  isOpen: boolean;
+  modal: React.ReactNode | null;
+  setOpen: (modal: React.ReactNode, fetchData?: () => Promise<any>) => void;
+  setClose: () => void;
+};
+
+export const useModal = create<ModalContextType>((set, get) => ({
+  data: {},
+  isOpen: false,
+  modal: null,
+  setOpen: async (modal: React.ReactNode, fetchData?: () => Promise<any>) => {
+    if (modal) {
+      if (fetchData) {
+        const newData = await fetchData();
+        set({ data: { ...get().data, ...newData }, modal });
+      } else {
+        set({ isOpen: true, modal });
+      }
+    }
+  },
+  setClose: () => set({ isOpen: false, data: {}, modal: null }),
+}));

@@ -1,5 +1,6 @@
 "use client";
 
+import { ModeToggle } from "@/components/mode-toggle";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -61,10 +62,11 @@ const Header = ({ setIsOpen }: Props) => {
         </Select>
       </div>
       <div className="flex items-center gap-2">
+        <ModeToggle />
         <Avatar>
           <AvatarFallback>{name[0]}</AvatarFallback>
         </Avatar>
-        <span className="text-sm font-medium">{name}</span>
+        <span className="text-sm font-medium hidden md:flex">{name}</span>
       </div>
     </header>
   );
