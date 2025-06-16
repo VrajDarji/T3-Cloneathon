@@ -141,7 +141,7 @@ export default function LandingPage() {
                 <MessageSquare className="w-4 h-4 text-white" />
               </div>
               <span className="font-semibold text-lg bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
-                MultiLLM Chat
+                LLM Paglu
               </span>
             </div>
             <div className="hidden md:flex items-center space-x-8">
@@ -526,7 +526,7 @@ export default function LandingPage() {
             </div>
           </div>
           <div className="border-t border-border/50 mt-8 pt-8 text-center text-sm text-muted-foreground">
-            <p>&copy; 2024 MultiLLM Chat. All rights reserved.</p>
+            <p>&copy; 2025 LLM Paglu. All rights reserved.</p>
           </div>
         </div>
       </footer>

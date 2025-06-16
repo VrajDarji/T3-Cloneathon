@@ -20,6 +20,7 @@ async function bootstrap() {
       const allowedOrigins = [
         'http://localhost:8001',
         'https://t3-cloneathon-mauve.vercel.app',
+        'https://app.llm-paglu.me',
       ];
 
       if (!origin || allowedOrigins.includes(origin)) {

@@ -68,9 +68,7 @@ export default function LoginPage() {
           <CardTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
             Welcome back
           </CardTitle>
-          <CardDescription>
-            Sign in to your MultiLLM Chat account
-          </CardDescription>
+          <CardDescription>Sign in to your LLM Paglu account</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">

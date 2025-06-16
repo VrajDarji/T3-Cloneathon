@@ -55,7 +55,7 @@ const SidebarComponent = ({ activeId, isOpen }: Props) => {
             <MessageSquare className="w-4 h-4 text-white" />
           </div>
           <span className="font-semibold text-lg bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
-            MultiLLM Chat
+            LLM Paglu
           </span>
         </div>
         <div className="p-4">

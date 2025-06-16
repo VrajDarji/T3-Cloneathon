@@ -75,7 +75,7 @@ export default function SignupPage() {
             Create account
           </CardTitle>
           <CardDescription>
-            Join MultiLLM Chat and start conversations with AI
+            Join LLM Paglu and start conversations with AI
           </CardDescription>
         </CardHeader>
         <CardContent>
