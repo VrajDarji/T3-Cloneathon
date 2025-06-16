@@ -52,6 +52,7 @@ export class AuthController {
       secure: NODE_ENV !== 'development',
       sameSite: NODE_ENV === 'development' ? 'lax' : 'none',
       path: '/',
+      domain: '.llm-paglu.me',
     };
 
     response.cookie('accessToken', accessToken, cookieOptions);
