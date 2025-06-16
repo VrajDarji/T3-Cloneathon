@@ -1,9 +1,9 @@
 "use client";
-import { getAllMsg } from "@/app/api";
+import { getPublicMsgs } from "@/app/api";
+import ChatArea from "@/app/chat/[chatId]/components/ChatArea";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { use, useEffect, useState } from "react";
-import ChatArea from "./components/ChatArea";
 
 type Props = {
   params: Promise<{ chatId: string }>;
@@ -17,8 +17,8 @@ const Page = ({ params }: Props) => {
   >([]);
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["allMsgs", chatId],
-    queryFn: () => getAllMsg(chatId),
+    queryKey: ["allPublicMsgs", chatId],
+    queryFn: () => getPublicMsgs(chatId),
     enabled: !!chatId && chatId !== "new",
     staleTime: 0,
     refetchOnWindowFocus: false,
@@ -45,7 +45,7 @@ const Page = ({ params }: Props) => {
   return (
     <>
       {error ? (
-        <div className="w-full h-full flex items-center justify-center flex-col row-gap-4 ">
+        <div className="w-full h-full flex items-center justify-center flex-col row-gap-4">
           <p className="text-md text-red-500">
             Error loading messages. Please try again.
           </p>

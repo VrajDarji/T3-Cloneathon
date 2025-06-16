@@ -2,11 +2,7 @@
 
 import type React from "react";
 
-import { useState } from "react";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
@@ -15,11 +11,17 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { MessageSquare, Eye, EyeOff, Check, X } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useProfileData } from "@/store";
 import { useMutation } from "@tanstack/react-query";
-import { signUp } from "../api";
+import { Check, Eye, EyeOff, MessageSquare, X } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
+import { useShallow } from "zustand/shallow";
+import { signUp } from "../api";
 
 export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -41,15 +43,28 @@ export default function SignupPage() {
   ];
 
   const router = useRouter();
+  const [setData] = useProfileData(useShallow((state) => [state.setData]));
 
   const { mutate: signUpFn, isPending } = useMutation({
     mutationFn: (data: { name: string; email: string; password: string }) =>
       signUp(data),
     onSuccess: (data: any) => {
-      router.push("/login");
+      toast.success("Sign up successfull");
+      const { data: rspData } = data;
+      const { loginUser: user } = rspData;
+      setData({
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        persona: user.persona,
+      });
+      router.push("/chat");
     },
     onError: (error: any) => {
       console.log({ error });
+      toast.error("Error signing up", {
+        description: error.message || "Please try later!!!",
+      });
     },
   });
 

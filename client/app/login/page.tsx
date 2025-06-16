@@ -13,14 +13,15 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useProfileData } from "@/store";
+import { useMutation } from "@tanstack/react-query";
 import { Eye, EyeOff, MessageSquare } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
-import { login } from "../api";
 import { useRouter } from "next/navigation";
-import { useProfileData } from "@/store";
+import { useState } from "react";
+import { toast } from "sonner";
 import { useShallow } from "zustand/react/shallow";
+import { login } from "../api";
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -41,10 +42,14 @@ export default function LoginPage() {
         name: user.name,
         persona: user.persona,
       });
-      router.push("/");
+      router.push("/chat");
+      toast.success("Logged in sucessfully!!!");
     },
     onError: (error: any) => {
       console.log({ error });
+      toast.error("Error loggin in", {
+        description: error.message || "Please try later!!",
+      });
     },
   });
 

@@ -43,7 +43,13 @@ export class AuthService {
         password: hashedPass,
       };
       const user = this.userRepository.create(data);
-      return await this.userRepository.save(user);
+      await this.userRepository.save(user);
+
+      const { accessToken, user: loginUser } = await this.login({
+        email: signUpDto.email,
+        password: signUpDto.password,
+      });
+      return { accessToken, loginUser };
     } catch (error) {
       throw new HttpException(
         `Failed to create user : ${error.messages}`,

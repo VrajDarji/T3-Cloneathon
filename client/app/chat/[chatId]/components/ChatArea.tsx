@@ -1,5 +1,6 @@
 "use client";
 
+import { useIsMobile } from "@/hooks/use-mobile";
 import { Loader2 } from "lucide-react";
 import { useEffect, useRef } from "react";
 import Message from "./Message";
@@ -23,8 +24,10 @@ const ChatArea = ({ chats, isLoading }: ChatAreaProps) => {
     }
   }, [chats]);
 
+  const isMobile = useIsMobile();
+
   return (
-    <div className="relative h-full w-full overflow-hidden">
+    <div className="relative h-full w-full overflow-hidden pb-[70px]">
       {isLoading ? (
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="flex flex-col items-center gap-4">
@@ -35,7 +38,7 @@ const ChatArea = ({ chats, isLoading }: ChatAreaProps) => {
       ) : (
         <div ref={scrollRef} className="h-full overflow-y-auto">
           <div className="min-h-full w-full px-4">
-            <div className="space-y-6 py-4 mx-28">
+            <div className={`space-y-6 py-4 ${isMobile ? "mx-0" : "mx-28"}`}>
               {chats.map((chat) => (
                 <Message
                   key={chat.id}

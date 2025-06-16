@@ -19,12 +19,12 @@ export class WebSearchService {
       });
 
       const $ = cheerio.load(data);
-      const results: string[] = [];
+      const results: { title: string; href: string }[] = [];
 
       $('a.result__snippet').each((i, el) => {
         const title = $(el).text();
         const href = $(el).attr('href');
-        if (title && href) results.push(`${title} - ${href}`);
+        if (title && href) results.push({ title, href });
       });
       return results.slice(0, 5);
     } catch (error) {

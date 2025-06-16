@@ -167,7 +167,7 @@ body {
 }
 
 .prose p {
-  @apply mb-4 leading-7;
+  @apply leading-7;
 }
 
 .prose h1,

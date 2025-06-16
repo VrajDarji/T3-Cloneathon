@@ -1,12 +1,12 @@
 "use client";
 
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { Loader } from "lucide-react";
-import { createNewChat, getAllChats } from "../api";
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { useChatData, useProfileData } from "@/store";
+import { useQuery } from "@tanstack/react-query";
+import { Loader } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { useShallow } from "zustand/react/shallow";
+import { getAllChats } from "../api";
 export default function ChatPage() {
   const [user] = useProfileData(useShallow((state) => [state.data]));
   const { id: userId } = user;
@@ -36,6 +36,8 @@ export default function ChatPage() {
             id: data.id,
             title: data.title,
             createdAt: data.createdAt,
+            isPublic: data.isPublic,
+            status: data.status,
           }))
         );
         router.push(`/chat/${latestChat.id}`);

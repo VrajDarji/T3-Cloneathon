@@ -29,6 +29,8 @@ export type chatType = {
   title: string;
   id: string;
   createdAt: string;
+  isPublic: boolean;
+  status: string;
 };
 
 type chatStoreTypes = {

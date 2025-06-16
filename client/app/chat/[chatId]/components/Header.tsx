@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { useProfileData } from "@/store";
 import { Menu } from "lucide-react";
 import React, { SetStateAction, useState } from "react";
@@ -31,8 +32,10 @@ const Header = ({ setIsOpen }: Props) => {
   const [selectedModel, setSelectedModel] = useState("gpt-4o");
   const [data] = useProfileData(useShallow((state) => [state.data]));
   const { name } = data;
+
+  const isMobile = useIsMobile();
   return (
-    <header className="border-b border-border/50 p-4 flex items-center justify-between glass-effect">
+    <header className="border-b border-border/50 p-4 flex items-center justify-between glass-effect w-full relative">
       <div className="flex items-center gap-4">
         <SidebarTrigger onClick={() => setIsOpen((prev) => !prev)}>
           <Button variant="ghost" size="icon">
@@ -40,7 +43,11 @@ const Header = ({ setIsOpen }: Props) => {
           </Button>
         </SidebarTrigger>
         <Select value={selectedModel} onValueChange={setSelectedModel}>
-          <SelectTrigger className="w-64 glass-effect border-0 shadow-sm">
+          <SelectTrigger
+            className={`${
+              isMobile ? "w-32" : "w-64"
+            } glass-effect border-0 shadow-sm`}
+          >
             <SelectValue />
           </SelectTrigger>
           <SelectContent className="glass-effect border-0">

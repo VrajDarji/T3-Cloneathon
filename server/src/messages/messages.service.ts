@@ -39,11 +39,47 @@ export class MessagesService {
     }
   }
 
-  async webSearch(query: string, chatId: string) {
+  async webSearch(createMsgDto: CreateMessageDto) {
     try {
-      const results = await this.webSearchService.searchDuckDuckGo(query);
+      await this.create(createMsgDto);
+      const { content } = createMsgDto;
 
-      return results;
+      const results = await this.webSearchService.searchDuckDuckGo(content);
+
+      const URL = this.configService.get('LLM_SERVER_URL') + `chat/send`;
+
+      const chatData = await this.chatRepository.findOne({
+        where: { id: createMsgDto.chatId },
+      });
+
+      const payload = {
+        message: content,
+        session_id: chatData?.sessionId,
+      };
+
+      const { data } = await axios.post(URL, payload);
+
+      const formattedResults =
+        results && results.length
+          ? results
+              .map(
+                (result: any, index: number) =>
+                  `${index + 1}. [${result.title}](${result.href})`,
+              )
+              .join('\n\n') // adds space between each result
+          : 'No relevant web results found.';
+
+      const finalResponse = `🔍 **Web Search Results:**\n\n${formattedResults}\n\n---\n\n🧠 **LLM Summary:**\n\n${data.response}`;
+
+      const msg = await this.create({
+        chatId: createMsgDto.chatId,
+        content: finalResponse,
+        senderType: SenderType.LLM,
+        codeSnippet: false,
+        language: '',
+      });
+
+      return await this.messageRepository.save(msg);
     } catch (error) {
       throw new HttpException(
         `Error :${error.message}`,

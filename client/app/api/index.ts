@@ -48,36 +48,32 @@ export const createBranch = async (data: {
   parentId: string;
   branchedFromMsgId: string;
 }) => {
-  try {
-    // Add error handling and proper request configuration
-    const response = await axios.post(`chats/branch`, data, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-      withCredentials: true,
-    });
-    return response;
-  } catch (error) {
-    console.error("Branch creation error:", error);
-    throw error;
-  }
+  return await axios.post(`chats/branch`, data);
+};
+
+export const makePublic = async (chatId: string) => {
+  return await axios.post(`chats/make-public/${chatId}`);
+};
+
+export const editChat = async (data: {
+  id: string;
+  status: "archived" | "starred";
+}) => {
+  return await axios.patch(`chats/${data.id}`, { status: data.status });
+};
+
+export const deleteChat = async (chatId: string) => {
+  return await axios.delete(`chats/${chatId}`);
 };
 
 // Message endpoints
 
 export const getAllMsg = async (chatId: string) => {
-  try {
-    const response = await axios.get(`messages/chats/${chatId}`, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-      withCredentials: true,
-    });
-    return response;
-  } catch (error) {
-    console.error("Error fetching messages:", error);
-    throw error;
-  }
+  return await axios.get(`messages/chats/${chatId}`);
+};
+
+export const getPublicMsgs = async (chatId: string) => {
+  return await axios.get(`messages/public/${chatId}`);
 };
 
 export const createMsg = async (data: {
@@ -96,6 +92,10 @@ export const askMsg = async (data: {
   return await axios.post(`messages/ask`, data);
 };
 
-export const webSearch = async (query: string) => {
-  return await axios.post(`messages/web-search?query=${query}`);
+export const webSearch = async (data: {
+  chatId: string;
+  senderType: "user" | "llm";
+  content: string;
+}) => {
+  return await axios.post(`messages/web-search`, data);
 };

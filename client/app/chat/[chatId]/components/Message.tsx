@@ -1,30 +1,31 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Bot, Check, Copy, GitBranch, Loader2, User } from "lucide-react";
-import { useParams, useRouter } from "next/navigation";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createBranch } from "@/app/api";
-import { useProfileData, useChatData } from "@/store";
-import { useShallow } from "zustand/react/shallow";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { PrismLight as SyntaxHighlighter } from "react-syntax-highlighter";
-import { oneDark } from "react-syntax-highlighter/dist/cjs/styles/prism";
-import javascript from "react-syntax-highlighter/dist/cjs/languages/prism/javascript";
-import typescript from "react-syntax-highlighter/dist/cjs/languages/prism/typescript";
-import python from "react-syntax-highlighter/dist/cjs/languages/prism/python";
-import bash from "react-syntax-highlighter/dist/cjs/languages/prism/bash";
-import json from "react-syntax-highlighter/dist/cjs/languages/prism/json";
-import ReactMarkdown from "react-markdown";
-import { oneLight } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useChatData, useProfileData } from "@/store";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Bot, Check, Copy, GitBranch, Loader2, User } from "lucide-react";
 import { useTheme } from "next-themes";
+import { useParams, useRouter } from "next/navigation";
+import { useState } from "react";
+import ReactMarkdown from "react-markdown";
+import { PrismLight as SyntaxHighlighter } from "react-syntax-highlighter";
+import bash from "react-syntax-highlighter/dist/cjs/languages/prism/bash";
+import javascript from "react-syntax-highlighter/dist/cjs/languages/prism/javascript";
+import json from "react-syntax-highlighter/dist/cjs/languages/prism/json";
+import python from "react-syntax-highlighter/dist/cjs/languages/prism/python";
+import typescript from "react-syntax-highlighter/dist/cjs/languages/prism/typescript";
+import { oneDark } from "react-syntax-highlighter/dist/cjs/styles/prism";
+import { oneLight } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { toast } from "sonner";
+import { useShallow } from "zustand/react/shallow";
 
 // Register commonly used languages
 SyntaxHighlighter.registerLanguage("js", javascript);
@@ -59,6 +60,8 @@ const Message = ({ content, senderType, id }: MessageProps) => {
 
   const { theme } = useTheme();
 
+  const isMobile = useIsMobile();
+
   const { mutate: branchChat, isPending } = useMutation({
     mutationFn: (data: {
       userId: string;
@@ -76,6 +79,8 @@ const Message = ({ content, senderType, id }: MessageProps) => {
           createdAt: rspData.createdAt,
           parentId: params.chatId,
           branchedFromMsgId: id,
+          isPublic: rspData.isPublic,
+          status: rspData.status,
         },
         ...oldChatData,
       ];
@@ -85,6 +90,8 @@ const Message = ({ content, senderType, id }: MessageProps) => {
       queryClient.invalidateQueries({ queryKey: ["userChats", user.id] });
       queryClient.invalidateQueries({ queryKey: ["allMsgs"] });
 
+      toast.success("Branch create successfully!!!");
+
       // Wait a short moment for the state to update
       setTimeout(() => {
         // Navigate to new chat and ensure data is fresh
@@ -93,6 +100,7 @@ const Message = ({ content, senderType, id }: MessageProps) => {
     },
     onError: (error) => {
       console.error("Failed to create branch:", error);
+      toast.error("Error creatig branch!! Please try later ");
     },
   });
 
@@ -200,7 +208,7 @@ const Message = ({ content, senderType, id }: MessageProps) => {
         className={`gap-4  ${
           senderType === "llm"
             ? "bg-muted/30 py-6 px-4 rounded-lg flex w-full sm:max-w-[85%]"
-            : "bg-primary/10 py-1 px-4 rounded-lg inline-flex max-w-fit"
+            : "bg-primary/10 py-1 items-center justify-center px-4 rounded-lg inline-flex max-w-fit"
         } ${senderType === "user" ? "flex-row-reverse" : "flex-row"}`}
       >
         <Avatar className="h-8 w-8 shrink-0">
@@ -220,7 +228,11 @@ const Message = ({ content, senderType, id }: MessageProps) => {
         </Avatar>
 
         <div className="flex-1 space-y-4 text-left break-words">
-          <div className="prose prose-neutral dark:prose-invert max-w-[120ch]">
+          <div
+            className={`prose prose-neutral dark:prose-invert ${
+              isMobile ? "max-w-[30ch]" : "max-w-[80ch]"
+            }`}
+          >
             <ReactMarkdown
               components={{
                 code({ className, children, ...props }) {

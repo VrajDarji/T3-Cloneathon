@@ -4,6 +4,7 @@ import "./globals.css";
 import QueryProvider from "@/provider/query-provider";
 import ModalProvider from "@/provider/modal-provider";
 import { ThemeProvider } from "@/provider/theme-provider";
+import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -38,6 +39,18 @@ export default function RootLayout({
             disableTransitionOnChange
           >
             <ModalProvider>{children}</ModalProvider>
+            <Toaster
+              position="top-right"
+              richColors
+              closeButton
+              toastOptions={{
+                classNames: {
+                  toast: "rounded-lg shadow-xl border border-border",
+                  title: "text-base font-semibold",
+                  description: "text-sm opacity-90",
+                },
+              }}
+            />
           </ThemeProvider>
         </body>
       </html>

@@ -13,8 +13,13 @@ export class AuthController {
   ) {}
 
   @Post('sign-up')
-  async signUp(@Body() signUpDto: SignUpDto) {
-    await this.authService.signUp(signUpDto);
+  async signUp(
+    @Body() signUpDto: SignUpDto,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const { accessToken, loginUser } = await this.authService.signUp(signUpDto);
+    this.assignCookieToResponse(response, accessToken, loginUser.id);
+    return { msg: 'Sign up successfull', accessToken, loginUser };
   }
 
   @Post('login')
@@ -52,7 +57,7 @@ export class AuthController {
       secure: NODE_ENV !== 'development',
       sameSite: NODE_ENV === 'development' ? 'lax' : 'none',
       path: '/',
-      domain: '.llm-paglu.me',
+      domain: NODE_ENV === 'development' ? 'localhost' : '.llm-paglu.me',
     };
 
     response.cookie('accessToken', accessToken, cookieOptions);

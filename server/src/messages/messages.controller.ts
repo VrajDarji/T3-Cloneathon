@@ -59,7 +59,7 @@ export class MessagesController {
   }
 
   @Post('web-search')
-  async webSearch(@Query('query') query: string, @Body() chatId: string) {
-    return await this.messagesService.webSearch(query, chatId);
+  async webSearch(@Body() createMsgDto: CreateMessageDto) {
+    return await this.messagesService.webSearch(createMsgDto);
   }
 }

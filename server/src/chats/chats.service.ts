@@ -108,6 +108,7 @@ export class ChatsService {
       if (!chat) {
         throw new NotFoundException('Chat not found');
       }
+
       Object.assign(chat, updateChatDto);
 
       return await this.chatRepository.save(chat);
@@ -122,10 +123,12 @@ export class ChatsService {
   async remove(id: string) {
     try {
       const chat = await this.findOne(id);
+
       if (!chat) {
         throw new NotFoundException('Chat not found');
       }
-      return await this.chatRepository.remove(chat);
+      await this.chatRepository.remove(chat);
+      return { msg: 'Removed', id };
     } catch (error) {
       throw new HttpException(
         `Error deleting data ${error.message}`,

@@ -1,6 +1,7 @@
 "use client";
 
-import Link from "next/link";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -9,21 +10,20 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import {
-  MessageSquare,
-  Zap,
-  Shield,
-  Users,
-  Star,
   ArrowRight,
-  Check,
   Bot,
-  Sparkles,
-  Globe,
+  Check,
   Cpu,
+  Globe,
+  MessageSquare,
+  Shield,
+  Sparkles,
+  Star,
+  Users,
+  Zap,
 } from "lucide-react";
+import Link from "next/link";
 
 const features = [
   {
