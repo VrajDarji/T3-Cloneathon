@@ -137,51 +137,60 @@ const InputQuery = ({ chatId }: Props) => {
 
   return (
     <form onSubmit={handleSubmit} className="w-full">
-      <div className="relative flex items-center w-full gap-2">
-        <Input
-          placeholder="Type your message here..."
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          className="flex-1 pr-24"
-          disabled={
-            isPending || isMsgLoading || isWbebSearchLoading || chatId === "new"
-          }
-        />
+      <div className="relative flex items-center w-full">
+        <div className="relative w-full group">
+          <div className="absolute -inset-px rounded-xl bg-gradient-to-r from-border/50 via-border to-border/50 opacity-50 group-focus-within:opacity-100 transition-opacity" />
+          <Input
+            placeholder="Type your message here..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            className="flex-1 pr-24 py-6 text-base shadow-sm border-border/40 rounded-xl
+              bg-background/80 backdrop-blur transition-all duration-200
+              focus-visible:ring-1 focus-visible:ring-border
+              focus-visible:border-border/60 group-hover:border-border/60"
+            disabled={
+              isPending || isMsgLoading || isWbebSearchLoading || chatId === "new"
+            }
+          />
+        </div>
         <div className="absolute right-2 flex items-center gap-2">
-          <Button
-            type="button"
-            size="icon"
-            variant={useWebSearch ? "default" : "ghost"}
-            className={`${
-              useWebSearch ? "" : "text-muted-foreground"
-            } transition-all`}
-            onClick={() => setUseWebSearch(!useWebSearch)}
-            disabled={
-              isPending ||
-              isMsgLoading ||
-              isWbebSearchLoading ||
-              chatId === "new"
-            }
-          >
-            <Globe className="h-5 w-5" />
-          </Button>
-          <Button
-            type="submit"
-            size="icon"
-            disabled={
-              query.trim() === "" ||
-              isPending ||
-              isMsgLoading ||
-              isWbebSearchLoading ||
-              chatId === "new"
-            }
-          >
-            {isPending || isMsgLoading || isWbebSearchLoading ? (
-              <Loader2 className="h-5 w-5 animate-spin" />
-            ) : (
-              <Send className="h-5 w-5" />
-            )}
-          </Button>
+          <div className="relative">
+            <Button
+              type="button"
+              size="icon"
+              variant={useWebSearch ? "default" : "ghost"}
+              className="rounded-lg shadow-sm hover:shadow transition-all duration-200"
+              onClick={() => setUseWebSearch(!useWebSearch)}
+              disabled={
+                isPending ||
+                isMsgLoading ||
+                isWbebSearchLoading ||
+                chatId === "new"
+              }
+            >
+              <Globe className="h-4 w-4 sm:h-5 sm:w-5" />
+            </Button>
+          </div>
+          <div className="relative">
+            <Button
+              type="submit"
+              size="icon"
+              className="rounded-lg shadow-sm hover:shadow transition-all duration-200"
+              disabled={
+                query.trim() === "" ||
+                isPending ||
+                isMsgLoading ||
+                isWbebSearchLoading ||
+                chatId === "new"
+              }
+            >
+              {isPending || isMsgLoading || isWbebSearchLoading ? (
+                <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
+              ) : (
+                <Send className="h-4 w-4 sm:h-5 sm:w-5" />
+              )}
+            </Button>
+          </div>
         </div>
       </div>
     </form>

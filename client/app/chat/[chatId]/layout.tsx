@@ -20,7 +20,7 @@ export default function ChatPage({ params, children }: Props) {
   return (
     <SidebarProvider>
       <div
-        className={`grid h-screen w-full bg-gradient-to-br from-background via-background to-muted/30 ${
+        className={`grid h-screen w-full ${
           isMobile ? "" : "grid-cols-[auto_1fr]"
         }`}
       >
@@ -28,23 +28,33 @@ export default function ChatPage({ params, children }: Props) {
         <SidebarComponent activeId={chatId} isOpen={isOpen} />
 
         {/* Main Chat Area */}
-        <div className="flex flex-col h-screen w-full relative">
+        <div className="flex flex-col h-screen w-full relative overflow-hidden">
           {/* Header */}
-          <Header setIsOpen={setIsOpen} />
+          <div className="relative z-10">
+            <div className="absolute inset-x-0 -bottom-px h-px bg-gradient-to-r from-border/0 via-border/50 to-border/0" />
+            <Header setIsOpen={setIsOpen} />
+          </div>
 
-          {/* Messages Area - Takes all available space */}
-          <div className="flex-1 overflow-hidden relative w-full pb-36">
-            {children}
+          {/* Messages Area */}
+          <div className="flex-1 overflow-hidden relative w-full pb-28">
+            <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] opacity-[0.015] pointer-events-none" />
+            <div className="relative h-full">{children}</div>
           </div>
 
           {/* Input Area */}
-          <div className="border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/75 absolute bottom-0 left-0 right-0">
-            <div
-              className={`${
-                isMobile ? "p-2" : "p-4"
-              } w-full max-w-screen-xl mx-auto`}
-            >
-              <InputQuery chatId={chatId !== "new" ? chatId : ""} />
+          <div className="absolute bottom-0 left-0 right-0">
+            <div className="relative">
+              {/* Top border gradient */}
+              <div className="absolute inset-x-0 -top-px h-px bg-gradient-to-r from-border/0 via-border/50 to-border/0" />
+
+              {/* Background with blur */}
+              <div className="bg-background/80 backdrop-blur-xl relative">
+                <div className="p-4 w-full max-w-[100vw] mx-auto">
+                  <div className="max-w-screen-lg mx-auto">
+                    <InputQuery chatId={chatId !== "new" ? chatId : ""} />
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
