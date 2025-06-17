@@ -15,7 +15,6 @@ type Props = {
 export default function ChatPage({ params, children }: Props) {
   const { chatId } = use(params);
   const [isOpen, setIsOpen] = useState<boolean>(true);
-
   const isMobile = useIsMobile();
 
   return (
@@ -29,18 +28,22 @@ export default function ChatPage({ params, children }: Props) {
         <SidebarComponent activeId={chatId} isOpen={isOpen} />
 
         {/* Main Chat Area */}
-        <div className="flex flex-col h-screen w-full relative overflow-hidden">
+        <div className="flex flex-col h-screen w-full relative">
           {/* Header */}
           <Header setIsOpen={setIsOpen} />
 
           {/* Messages Area - Takes all available space */}
-          <div className="flex-1 overflow-hidden relative w-full ">
+          <div className="flex-1 overflow-hidden relative w-full pb-36">
             {children}
           </div>
 
-          {/* Input Area - Fixed at bottom */}
-          <div className="border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/75 flex items-center justify-center glass-effect fixed bottom-0 left-0 w-full">
-            <div className="container py-4 flex items-center justify-center w-full relative">
+          {/* Input Area */}
+          <div className="border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/75 absolute bottom-0 left-0 right-0">
+            <div
+              className={`${
+                isMobile ? "p-2" : "p-4"
+              } w-full max-w-screen-xl mx-auto`}
+            >
               <InputQuery chatId={chatId !== "new" ? chatId : ""} />
             </div>
           </div>

@@ -136,44 +136,50 @@ const InputQuery = ({ chatId }: Props) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="relative">
-      <div
-        className={`relative flex items-center ${
-          isMobile ? "min-w-[400px]" : "min-w-[800px]"
-        } `}
-      >
+    <form onSubmit={handleSubmit} className="w-full">
+      <div className="relative flex items-center w-full gap-2">
         <Input
-          placeholder="Ask Anything..."
+          placeholder="Type your message here..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          className="sm:pr-0 md:pr-20 rounded-full border-muted-foreground/20 focus-visible:ring-1 focus-visible:ring-offset-1 focus-visible:ring-purple-500"
+          className="flex-1 pr-24"
+          disabled={
+            isPending || isMsgLoading || isWbebSearchLoading || chatId === "new"
+          }
         />
-
         <div className="absolute right-2 flex items-center gap-2">
           <Button
             type="button"
-            size="sm"
+            size="icon"
             variant={useWebSearch ? "default" : "ghost"}
-            className={`rounded-full px-2 transition-colors ${
-              useWebSearch
-                ? "bg-purple-600 text-white hover:bg-purple-700"
-                : "text-muted-foreground"
-            }`}
-            onClick={() => setUseWebSearch((prev) => !prev)}
+            className={`${
+              useWebSearch ? "" : "text-muted-foreground"
+            } transition-all`}
+            onClick={() => setUseWebSearch(!useWebSearch)}
+            disabled={
+              isPending ||
+              isMsgLoading ||
+              isWbebSearchLoading ||
+              chatId === "new"
+            }
           >
-            <Globe className="h-4 w-4" /> Web Search
+            <Globe className="h-5 w-5" />
           </Button>
           <Button
-            size="icon"
             type="submit"
-            variant="ghost"
-            className="h-8 w-8 rounded-full hover:bg-purple-500 hover:text-white transition-colors"
-            disabled={!query.trim() || isPending || isMsgLoading}
+            size="icon"
+            disabled={
+              query.trim() === "" ||
+              isPending ||
+              isMsgLoading ||
+              isWbebSearchLoading ||
+              chatId === "new"
+            }
           >
             {isPending || isMsgLoading || isWbebSearchLoading ? (
-              <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+              <Loader2 className="h-5 w-5 animate-spin" />
             ) : (
-              <Send className="h-4 w-4" />
+              <Send className="h-5 w-5" />
             )}
           </Button>
         </div>
